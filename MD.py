@@ -103,6 +103,32 @@ class equilibration:
                               open(filename_output_pdb, 'w'))
         print("done")
 
+    def forcegroupify(self):
+        """
+        Create force groups for the system
+        (see https://goo.gl/p12IkM)
+        """
+        forcegroups = {}
+        for i in range(self.system.getNumForces()):
+            force = self.system.getForce(i)
+            force.setForceGroup(i)
+            forcegroups[force] = i
+        return forcegroups
+
+    def getEnergyDecomposition(self):
+        """
+        Decompose the energy for each force.
+        Useful to see the energy of the CustomExternalForce
+        (see https://goo.gl/p12IkM)
+        """
+        context = self.simulation.context
+        forcegroups = self.forcegroupify()
+        energies = {}
+        for f, i in forcegroups.items():
+            energies[f] = context.getState(getEnergy=True, groups=2**i)\
+                            .getPotentialEnergy()
+        return energies
+
 class production():
     """
     """
