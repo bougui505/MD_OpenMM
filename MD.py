@@ -40,7 +40,22 @@ class equilibration:
                     ewaldErrorTolerance=0.0005, temperature=300*unit.kelvin,
                     collision_rate=1.0/unit.picoseconds,
                     timestep=2.0*unit.femtoseconds, platform_name='OpenCL',
-                    CpuThreads=1):
+                    CpuThreads=1, external_force=None,
+                    global_parameters=[('k', 5.0*unit.kilocalories_per_mole\
+                    /unit.angstroms**2)],
+                    per_particle_parameters=['x0', 'y0', 'z0'],
+                    atom_list=('CA', 'C', 'N', 'O')):
+        """
+        • If external_force is not None: add the algebraic expression as an
+        external force to the system (see: https://goo.gl/ei4pza)
+        ‣ Positional restraints example:
+            external_force = "k*((x-x0)^2+(y-y0)^2+(z-z0)^2)"
+        ‣ The global_parameters gives the global parameters for the external force 
+        and the default is set for the positional restraints example.
+        ‣ The per_particle_parameters gives the per particle parameters and the
+        default is set to the x, y, z coordinates
+        ‣ atom_list is the list of atom type to apply the force on
+        """
         print("Creating system...")
         self.system = self.forcefield.createSystem(self.modeller.topology,
             nonbondedMethod=nonbondedMethod, nonbondedCutoff=nonbondedCutoff,
@@ -51,6 +66,17 @@ class equilibration:
         self.platform = mm.Platform.getPlatformByName(platform_name)
         if platform_name == 'CPU':
             self.platform.setPropertyDefaultValue('CpuThreads', '%s'%CpuThreads)
+        if external_force is not None:
+            self.force = mm.CustomExternalForce(external_force)
+            for p,v in global_parameters:
+                self.force.addGlobalParameter(p, v)
+            for p in per_particle_parameters:
+                self.force.addPerParticleParameter(p)
+            for i, atom_crd in enumerate(self.modeller.positions):
+                atom = self.modeller.topology.atoms().next()
+                if atom.name in atom_list:
+                    self.force.addParticle(i, atom_crd.value_in_unit(mm.unit.nanometers))
+            self.system.addForce(self.force)
         self.simulation = app.Simulation(self.modeller.topology, self.system,
                                         self.integrator, self.platform)
         self.simulation.context.setPositions(self.modeller.positions)
