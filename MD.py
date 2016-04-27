@@ -36,7 +36,7 @@ class equilibration:
 
     def create_system(self, nonbondedMethod=app.PME,
                     nonbondedCutoff=1.0*unit.nanometers,
-                    constraints=app.AllBonds, rigidWater=True,
+                    constraints=app.HBonds, rigidWater=True,
                     ewaldErrorTolerance=0.0005, temperature=300*unit.kelvin,
                     collision_rate=1.0/unit.picoseconds,
                     timestep=2.0*unit.femtoseconds, platform_name='OpenCL',
