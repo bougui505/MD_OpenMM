@@ -112,9 +112,12 @@ class equilibration:
         print("done")
 
     def equilibrate(self, number_of_steps=15000, report_interval=1000,
+                    filename_output_dcd="traj.dcd",
                     filename_output_pdb="equilibrated.pdb",
                     filename_output_log="openmm_equilibration.log"):
         print("Equilibrating...")
+        self.simulation.reporters.append(app.DCDReporter(filename_output_dcd,
+                                                         report_interval))
         self.simulation.reporters.append(app.StateDataReporter(filename_output_log,
             report_interval, step=True, time=True, potentialEnergy=True,
             kineticEnergy=True, totalEnergy=True, temperature=True, volume=True,
