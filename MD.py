@@ -46,7 +46,7 @@ class MD:
                     /unit.angstroms**2)],
                     per_particle_parameters=['x0', 'y0', 'z0'],
                     atom_list=('CA', 'C', 'N', 'O'),
-                    per_particle_values=[]):
+                    per_particle_values=[], filename_output_pdb='init.pdb'):
         """
         • If external_force is not None: add the algebraic expression as an
         external force to the system (see: https://goo.gl/ei4pza)
@@ -104,6 +104,9 @@ class MD:
                                         self.integrator, self.platform)
         self.simulation.context.setPositions(self.modeller.positions)
         self.simulation.context.setVelocitiesToTemperature(temperature)
+        positions = self.simulation.context.getState(getPositions=True).getPositions()
+        app.PDBFile.writeFile(self.simulation.topology, positions,
+                              open(filename_output_pdb, 'w'))
         print("done")
 
     def minimize(self, filename_output_pdb="minimized.pdb",):
