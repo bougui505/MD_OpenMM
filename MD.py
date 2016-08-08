@@ -156,3 +156,19 @@ class MD:
             energies[f] = context.getState(getEnergy=True, groups=2**i)\
                             .getPotentialEnergy()
         return energies
+
+    def create_checkpoint(self, filename):
+        """
+        Creating checkpoints; see:
+        https://goo.gl/vtEsKA
+        """
+        with open('%s.chk'%filename, 'wb') as f:
+            f.write(self.simulation.context.createCheckpoint())
+
+    def load_checkpoint(self, filename):
+        """
+        Load the given checkpoint for the loaded system; see:
+        https://goo.gl/Iv6E7S
+        """
+        with open('%s.chk'%filename, 'rb') as f:
+            self.simulation.context.loadCheckpoint(f.read())
